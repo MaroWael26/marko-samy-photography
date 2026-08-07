@@ -180,4 +180,62 @@
 
     // Init
     updateVisibleGalleryItems();
+        // --- Google Reviews Carousel ---
+    const reviewsTrack = document.getElementById('reviews-track');
+    const reviewsPrev = document.getElementById('reviews-prev');
+    const reviewsNext = document.getElementById('reviews-next');
+    const reviewDots = document.querySelectorAll('.review-dot');
+    
+    let currentReviewIndex = 0;
+    const totalReviewCards = document.querySelectorAll('.review-card').length;
+    const cardsPerView = () => {
+        if (window.innerWidth >= 1024) return 3;
+        if (window.innerWidth >= 768) return 2;
+        return 1;
+    };
+
+    function updateReviewsCarousel() {
+        const cardWidth = reviewsTrack.children[0].offsetWidth + 24; // card width + gap
+        const offset = currentReviewIndex * cardWidth;
+        reviewsTrack.style.transform = `translateX(-${offset}px)`;
+        
+        // Update dots
+        reviewDots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentReviewIndex);
+        });
+    }
+
+    reviewsPrev.addEventListener('click', () => {
+        currentReviewIndex = Math.max(0, currentReviewIndex - 1);
+        updateReviewsCarousel();
+    });
+
+    reviewsNext.addEventListener('click', () => {
+        const maxIndex = totalReviewCards - cardsPerView();
+        currentReviewIndex = Math.min(maxIndex, currentReviewIndex + 1);
+        updateReviewsCarousel();
+    });
+
+    reviewDots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            currentReviewIndex = parseInt(dot.getAttribute('data-index'));
+            updateReviewsCarousel();
+        });
+    });
+
+    // Auto-play reviews every 5 seconds
+    setInterval(() => {
+        const maxIndex = totalReviewCards - cardsPerView();
+        currentReviewIndex = currentReviewIndex >= maxIndex ? 0 : currentReviewIndex + 1;
+        updateReviewsCarousel();
+    }, 5000);
+
+    // Update on window resize
+    window.addEventListener('resize', () => {
+        const maxIndex = totalReviewCards - cardsPerView();
+        if (currentReviewIndex > maxIndex) {
+            currentReviewIndex = maxIndex;
+        }
+        updateReviewsCarousel();
+    });
 })();

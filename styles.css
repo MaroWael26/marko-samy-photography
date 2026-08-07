@@ -442,6 +442,48 @@ html {
 }
 
 /* ============================================
+   GOOGLE REVIEWS
+   ============================================ */
+.review-card {
+    transition: transform 0.3s ease;
+}
+.review-card:hover {
+    transform: translateY(-4px);
+}
+
+.review-dot {
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+.review-dot.active {
+    background-color: var(--gold-500) !important;
+    width: 24px !important;
+    border-radius: 6px !important;
+}
+
+#reviews-prev,
+#reviews-next {
+    opacity: 0.8;
+}
+#reviews-prev:hover,
+#reviews-next:hover {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    #reviews-prev {
+        left: 8px;
+    }
+    #reviews-next {
+        right: 8px;
+    }
+    .review-card {
+        padding: 0 4px;
+    }
+}
+
+/* ============================================
    SOCIAL ICONS
    ============================================ */
 .social-icon {
