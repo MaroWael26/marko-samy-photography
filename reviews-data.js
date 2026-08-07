@@ -9,7 +9,7 @@ const googleReviewsData = {
     summary: {
         rating: "4.9",           // متوسط التقييم
         totalReviews: "40",     // عدد التقييمات
-        googleUrl: "https://g.page/r/YOUR_PLACE_ID/review" // رابط كتابة تقييم
+        googleUrl: "https://search.google.com/local/writereview?placeid=ChIJIeZ8XwBBWBQR23Fz8iROEto" // رابط كتابة تقييم
     },
     
     // التقييمات الفردية

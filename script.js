@@ -1,5 +1,5 @@
 (function() {
-    // DOM Elements
+    // ==================== DOM Elements ====================
     const navbar = document.getElementById('navbar');
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -21,21 +21,23 @@
     const selectedPackageName = document.getElementById('selected-package-name');
     const currentYearSpan = document.getElementById('current-year');
 
-    // State
+    // ==================== State ====================
     let isMobileMenuOpen = false;
     let currentLightboxIndex = -1;
     let currentGalleryItems = [];
 
-    // Set year
-    if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+    // ==================== Set Current Year ====================
+    if (currentYearSpan) {
+        currentYearSpan.textContent = new Date().getFullYear();
+    }
 
-    // Update visible gallery items
+    // ==================== Update Gallery Items ====================
     function updateVisibleGalleryItems() {
         const allItems = galleryGrid.querySelectorAll('.gallery-item');
         currentGalleryItems = Array.from(allItems).filter(item => item.style.display !== 'none');
     }
 
-    // Mobile menu
+    // ==================== Mobile Menu ====================
     function openMobileMenu() {
         isMobileMenuOpen = true;
         mobileMenu.classList.add('open');
@@ -56,18 +58,27 @@
         bar3.style.transform = 'rotate(0) translate(0, 0)';
     }
 
-    hamburgerBtn.addEventListener('click', () => isMobileMenuOpen ? closeMobileMenu() : openMobileMenu());
+    hamburgerBtn.addEventListener('click', () => {
+        isMobileMenuOpen ? closeMobileMenu() : openMobileMenu();
+    });
     mobileBackdrop.addEventListener('click', closeMobileMenu);
     mobileLinks.forEach(link => link.addEventListener('click', closeMobileMenu));
 
-    // Navbar scroll
+    // Escape key to close menu
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isMobileMenuOpen) closeMobileMenu();
+    });
+
+    // ==================== Navbar Scroll ====================
     window.addEventListener('scroll', () => {
+        // Navbar shadow
         if (window.scrollY > 50) {
             navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.5)';
         } else {
             navbar.style.boxShadow = 'none';
         }
         
+        // Back to top button
         if (window.scrollY > 600) {
             backToTopBtn.classList.add('visible');
         } else {
@@ -75,13 +86,17 @@
         }
     }, { passive: true });
 
-    backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    // ==================== Back to Top ====================
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
-    // Gallery filtering
+    // ==================== Gallery Filtering ====================
     filterTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             filterTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
+            
             const filterValue = tab.getAttribute('data-filter');
             const allItems = galleryGrid.querySelectorAll('.gallery-item');
             
@@ -98,11 +113,12 @@
                     item.style.display = 'none';
                 }
             });
+            
             setTimeout(updateVisibleGalleryItems, 400);
         });
     });
 
-    // Lightbox
+    // ==================== Lightbox ====================
     function openLightbox(index) {
         updateVisibleGalleryItems();
         if (currentGalleryItems.length === 0) return;
@@ -148,9 +164,17 @@
     });
 
     lightboxClose.addEventListener('click', closeLightbox);
-    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-    lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(-1); });
-    lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(1); });
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+    });
+    lightboxPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateLightbox(-1);
+    });
+    lightboxNext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateLightbox(1);
+    });
 
     document.addEventListener('keydown', (e) => {
         if (!lightbox.classList.contains('active')) return;
@@ -159,83 +183,34 @@
         if (e.key === 'ArrowRight') navigateLightbox(1);
     });
 
-    // Package selection
+    // ==================== Package Selection ====================
     window.selectPackage = function(packageName) {
         selectedPackageName.textContent = packageName;
         selectedPackageIndicator.classList.remove('hidden');
         document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
     };
 
+    // ==================== Scroll Reveal ====================
     // Scroll reveal
-    const revealElements = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
+const revealElements = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            // أضف تأخير بسيط عشان الحركة تبقى سلسة
+            setTimeout(() => {
                 entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.12 });
-    revealElements.forEach(el => observer.observe(el));
-
-    // Init
-    updateVisibleGalleryItems();
-        // --- Google Reviews Carousel ---
-    const reviewsTrack = document.getElementById('reviews-track');
-    const reviewsPrev = document.getElementById('reviews-prev');
-    const reviewsNext = document.getElementById('reviews-next');
-    const reviewDots = document.querySelectorAll('.review-dot');
-    
-    let currentReviewIndex = 0;
-    const totalReviewCards = document.querySelectorAll('.review-card').length;
-    const cardsPerView = () => {
-        if (window.innerWidth >= 1024) return 3;
-        if (window.innerWidth >= 768) return 2;
-        return 1;
-    };
-
-    function updateReviewsCarousel() {
-        const cardWidth = reviewsTrack.children[0].offsetWidth + 24; // card width + gap
-        const offset = currentReviewIndex * cardWidth;
-        reviewsTrack.style.transform = `translateX(-${offset}px)`;
-        
-        // Update dots
-        reviewDots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === currentReviewIndex);
-        });
-    }
-
-    reviewsPrev.addEventListener('click', () => {
-        currentReviewIndex = Math.max(0, currentReviewIndex - 1);
-        updateReviewsCarousel();
-    });
-
-    reviewsNext.addEventListener('click', () => {
-        const maxIndex = totalReviewCards - cardsPerView();
-        currentReviewIndex = Math.min(maxIndex, currentReviewIndex + 1);
-        updateReviewsCarousel();
-    });
-
-    reviewDots.forEach(dot => {
-        dot.addEventListener('click', () => {
-            currentReviewIndex = parseInt(dot.getAttribute('data-index'));
-            updateReviewsCarousel();
-        });
-    });
-
-    // Auto-play reviews every 5 seconds
-    setInterval(() => {
-        const maxIndex = totalReviewCards - cardsPerView();
-        currentReviewIndex = currentReviewIndex >= maxIndex ? 0 : currentReviewIndex + 1;
-        updateReviewsCarousel();
-    }, 5000);
-
-    // Update on window resize
-    window.addEventListener('resize', () => {
-        const maxIndex = totalReviewCards - cardsPerView();
-        if (currentReviewIndex > maxIndex) {
-            currentReviewIndex = maxIndex;
+            }, 100);
+            observer.unobserve(entry.target);
         }
-        updateReviewsCarousel();
     });
+}, { 
+    threshold: 0.12,
+    rootMargin: '0px 0px -50px 0px' // تأخير التفعيل شوية
+});
+revealElements.forEach(el => observer.observe(el));
+
+    // ==================== Init ====================
+    updateVisibleGalleryItems();
+    
+    console.log('✅ Main script loaded successfully!');
 })();
