@@ -186,28 +186,12 @@ function updateActiveDot() {
 }
 
 // ============================================
-// SIMPLE CAROUSEL - SCROLL TO CARD
+// NAVIGATION
 // ============================================
 function goToReview(index) {
-    const track = document.getElementById('reviews-track');
-    if (!track) return;
-    
-    const cards = track.querySelectorAll('.review-card');
-    if (cards.length === 0) return;
-    
-    const maxIndex = Math.max(0, cards.length - getCardsPerView());
+    const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
     currentReviewIndex = Math.max(0, Math.min(index, maxIndex));
-    
-    // نجيب الكارت اللي عايزين نروح له
-    const targetCard = cards[currentReviewIndex];
-    
-    // نعمل scroll للكارت ده
-    targetCard.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'start'
-    });
-    
+    updateCarousel();
     updateActiveDot();
 }
 
@@ -222,7 +206,7 @@ function updateCarousel() {
     if (targetCard) {
         targetCard.scrollIntoView({
             behavior: 'smooth',
-            block: 'nearest',    // ← المهم: nearest مش start
+            block: 'nearest',
             inline: 'start'
         });
     }
@@ -265,27 +249,28 @@ function initCarousel() {
         });
     }
     
-    // Manual scroll detection - تحديث الدواير لما المستخدم يسحب يدوي
-    if (track) {
-        track.addEventListener('scroll', () => {
-            const cards = track.querySelectorAll('.review-card');
-            if (cards.length === 0) return;
-            
-            const trackScroll = track.scrollLeft;
-            const cardWidth = cards[0].offsetWidth + 24;
-            
-            // Calculate which card is most visible
-            const newIndex = Math.round(trackScroll / cardWidth);
-            const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
-            
-            currentReviewIndex = Math.max(0, Math.min(newIndex, maxIndex));
-            
-            // Update dots
-            updateActiveDot();
-        });
-    }
+    // Manual scroll/touch detection - works on mobile & desktop
+    // Manual scroll/touch detection - updates dots instantly
+if (track) {
+    track.addEventListener('scroll', () => {
+        const cards = track.querySelectorAll('.review-card');
+        if (cards.length === 0) return;
+        
+        const trackScroll = track.scrollLeft;
+        const cardWidth = cards[0].offsetWidth + 24;
+        
+        // Calculate which card is most visible
+        const newIndex = Math.round(trackScroll / cardWidth);
+        const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
+        
+        currentReviewIndex = Math.max(0, Math.min(newIndex, maxIndex));
+        
+        // Update dots instantly while scrolling
+        updateActiveDot();
+    }, { passive: true });
+}
     
-    // Window resize
+    // Window resize - update dots count and carousel
     window.addEventListener('resize', () => {
         const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
         if (currentReviewIndex > maxIndex) currentReviewIndex = maxIndex;
@@ -293,7 +278,7 @@ function initCarousel() {
         updateActiveDot();
     });
     
-    // Auto-play
+    // Auto-play every 8 seconds (only when reviews section is visible)
     setInterval(() => {
         const reviewsSection = document.getElementById('reviews');
         if (!reviewsSection) return;
@@ -301,7 +286,7 @@ function initCarousel() {
         const rect = reviewsSection.getBoundingClientRect();
         const windowHeight = window.innerHeight;
         
-        // Only auto-play if reviews section is visible
+        // Only auto-play if reviews section is visible on screen
         if (rect.bottom < 100 || rect.top > windowHeight - 100) {
             return;
         }
@@ -314,7 +299,7 @@ function initCarousel() {
 }
 
 // ============================================
-// START
+// START EVERYTHING
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     displayReviews();
