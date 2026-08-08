@@ -240,7 +240,9 @@ function getCardsPerView() {
 function initCarousel() {
     const prevBtn = document.getElementById('reviews-prev');
     const nextBtn = document.getElementById('reviews-next');
+    const track = document.getElementById('reviews-track');
     
+    // Previous button
     if (prevBtn) {
         prevBtn.addEventListener('click', () => {
             if (currentReviewIndex > 0) {
@@ -251,6 +253,7 @@ function initCarousel() {
         });
     }
     
+    // Next button
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
             const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
@@ -262,6 +265,27 @@ function initCarousel() {
         });
     }
     
+    // Manual scroll detection - تحديث الدواير لما المستخدم يسحب يدوي
+    if (track) {
+        track.addEventListener('scroll', () => {
+            const cards = track.querySelectorAll('.review-card');
+            if (cards.length === 0) return;
+            
+            const trackScroll = track.scrollLeft;
+            const cardWidth = cards[0].offsetWidth + 24;
+            
+            // Calculate which card is most visible
+            const newIndex = Math.round(trackScroll / cardWidth);
+            const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
+            
+            currentReviewIndex = Math.max(0, Math.min(newIndex, maxIndex));
+            
+            // Update dots
+            updateActiveDot();
+        });
+    }
+    
+    // Window resize
     window.addEventListener('resize', () => {
         const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
         if (currentReviewIndex > maxIndex) currentReviewIndex = maxIndex;
@@ -269,24 +293,24 @@ function initCarousel() {
         updateActiveDot();
     });
     
-    // تشغيل تلقائي بعد 8 ثواني (بدل 5)
-setInterval(() => {
-    const reviewsSection = document.getElementById('reviews');
-    if (!reviewsSection) return;
-    
-    const rect = reviewsSection.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    
-    // لو الـ reviews section مش باين بالكامل، متحركش
-    if (rect.bottom < 100 || rect.top > windowHeight - 100) {
-        return;
-    }
-    
-    const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
-    currentReviewIndex = currentReviewIndex >= maxIndex ? 0 : currentReviewIndex + 1;
-    updateCarousel();
-    updateActiveDot();
-}, 8000); // 8 ثواني بدل 5
+    // Auto-play
+    setInterval(() => {
+        const reviewsSection = document.getElementById('reviews');
+        if (!reviewsSection) return;
+        
+        const rect = reviewsSection.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        // Only auto-play if reviews section is visible
+        if (rect.bottom < 100 || rect.top > windowHeight - 100) {
+            return;
+        }
+        
+        const maxIndex = Math.max(0, googleReviewsData.reviews.length - getCardsPerView());
+        currentReviewIndex = currentReviewIndex >= maxIndex ? 0 : currentReviewIndex + 1;
+        updateCarousel();
+        updateActiveDot();
+    }, 8000);
 }
 
 // ============================================
